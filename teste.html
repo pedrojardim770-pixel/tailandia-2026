@@ -96,7 +96,23 @@ function showAll(kind){
   if(eats.length===1){const foodMarker=markers[markers.length-1];foodMarker.openPopup();}
   return;
  }
- clearTop();clearMap();const btn=document.getElementById(kind+'Btn');if(btn)btn.classList.add('active');let pts=[];if(kind==='hotel'){const today=days.find(d=>d.id===active);const h=hotels[today.hotel];if(h){const hotel={...h,n:'🏨',d:'Hotel correspondente ao dia '+today.date+'. Toque em Direções apenas se quiser abrir a navegação GPS.'};const marker=L.marker([h.lat,h.lng],{icon:pin('H')}).addTo(map).bindPopup(popup(hotel));markers.push(marker);map.setView([h.lat,h.lng],16);marker.openPopup();return;}pts=[];}if(kind==='airport'){
+ clearTop();clearMap();const btn=document.getElementById(kind+'Btn');if(btn)btn.classList.add('active');let pts=[];if(kind==='hotel'){
+ const today=days.find(d=>d.id===active);
+ const h=hotels[today.hotel];
+ if(h){
+  // Manter os pontos numerados do dia e acrescentar apenas o hotel.
+  renderDay();
+  const hotel={...h,n:'🏨',d:'Hotel correspondente ao dia '+today.date+'. Toque em Direções para iniciar a navegação GPS.'};
+  const marker=L.marker([h.lat,h.lng],{icon:pin('H')}).addTo(map).bindPopup(popup(hotel));
+  markers.push(marker);
+  const coords=[...today.points.map(p=>[p.lat,p.lng]),[h.lat,h.lng]];
+  map.fitBounds(L.latLngBounds(coords),{padding:[55,55],maxZoom:15});
+  marker.openPopup();
+  document.getElementById('hotelBtn').classList.add('active');
+  return;
+ }
+ pts=[];
+}if(kind==='airport'){
  const d=days.find(x=>x.id===active);
  const dayAirports=d.points.filter(p=>/aeroporto/i.test(p.name));
  pts=dayAirports.map(p=>({...p,n:'✈'}));
